@@ -25,8 +25,23 @@ pipeline {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
                         dockerImage.push()
-                        dockerImage.push("latest")      // Optional: push 'latest' tag
+                        dockerImage.push("latest")
                     }
+                }
+            }
+        }
+
+        stage('Deploy on EC2') {
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ec2-user@65.0.177.72 "
+                        docker pull barathh1357/node_app:latest &&
+                        docker stop node_app || true &&
+                        docker rm node_app || true &&
+                        docker run -d -p 80:3000 --name node_app barathh1357/node_app:latest
+                    "
+                    '''
                 }
             }
         }
@@ -34,7 +49,7 @@ pipeline {
 
     post {
         success {
-            echo "Image pushed to Docker Hub: ${DOCKERHUB_REPO}:${env.BUILD_NUMBER}"
+            echo "Deployment completed successfully!"
         }
     }
 }
