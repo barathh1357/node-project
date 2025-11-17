@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_REPO = "barathh1357/node_app"
         EC2_USER = "ubuntu"
-        EC2_HOST = "52.66.227.159"
+        EC2_HOST = "15.206.183.151"
     }
 
     stages {
